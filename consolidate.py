@@ -34,7 +34,9 @@ if __name__ == '__main__':
 	enddate = datetime.datetime.strptime(enddatestr, '%Y-%m-%dT%H-%M-%S')
 
 
-	maindf = getmaindata.getmaindata().set_index('Time')
+	maindf = getmaindata.getmaindata().set_index('Time')	#Use the 'Time' column (which contains datetime objects) as the index.
+															#We will insert another column later which also has the name 'Time'.
+															#Don't get confused.
 	esdf = getesdata.getesdata().set_index('Time')
 	psudf = getpsudata.getpsudata().set_index('Time')
 
@@ -43,15 +45,18 @@ if __name__ == '__main__':
 	finaldf = maindf.join(esdf)
 	finaldf = finaldf.join(psudf)
 
-	print(finaldf)
-
 	#Apply start and end dates
 	finaldf = finaldf[startdate:enddate]
 
 	finaldf = finaldf.resample(datetime.timedelta(microseconds = int((1e6)*(1/datarate)))).interpolate()
 
+	finaldf['ISOTime'] = finaldf.index.map(lambda x: str(x.isoformat()))	#Create the ISO timestamp column
+	temp = finaldf.pop('ISOTime')	#Remove it...
+
+	finaldf.insert(0, 'Time', temp)	#...and re-insert it at the left as 'Time'.
+
 	print(finaldf)
 
 	outputfilename = f'{startdatestr}_to_{enddatestr}_consolidated.csv'	#Processed filename has the start date as name
-	finaldf.to_csv(outputfilename, index=True)
+	finaldf.to_csv(outputfilename, index=False)
 	print(f'Wrote processed CSV to file.')

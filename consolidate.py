@@ -55,6 +55,14 @@ if __name__ == '__main__':
 
 	finaldf.insert(0, 'Time', temp)	#...and re-insert it at the left as 'Time'.
 
+	#Compute the power columns. 
+	finaldf['P1'] = finaldf['I1']*finaldf['Voltage (V)']
+	finaldf['P2'] = finaldf['I2']*finaldf['Voltage (V)']
+	finaldf['P3'] = finaldf['I3']*finaldf['Voltage (V)']
+	finaldf['P4'] = finaldf['I4']*finaldf['Voltage (V)']
+	finaldf['P5'] = finaldf['I5']*finaldf['Voltage (V)']
+	finaldf['P6'] = finaldf['I6']*finaldf['Voltage (V)']
+
 	print(finaldf)
 
 	outputfilename = f'{startdatestr}_to_{enddatestr}_consolidated.csv'	#Processed filename has the start date as name

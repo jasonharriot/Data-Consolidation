@@ -19,8 +19,8 @@ import getpsudata	#Total current and voltage data logged by Joe's LabVIEW panel
 
 
 
-startdatestr = '2024-05-14T12-10-00'
-enddatestr = '2024-05-14T13-30-00'
+startdatestr = '2024-05-15T12-00-00'
+enddatestr = '2024-05-15T16-00-00'
 datarate = 1	#Hz. If source data rate is less than this, it will be interpolated.
 
 
@@ -45,11 +45,36 @@ if __name__ == '__main__':
 
 	date = startdate
 
-	finaldf = maindf.join(esdf)
-	finaldf = finaldf.join(psudf)
+	finaldf = maindf.join(esdf).join(psudf)
 
 	#Apply start and end dates
+	#finaldf = finaldf.set_index('Time')
+	
 	finaldf = finaldf[startdate:enddate]
+
+	#print(finaldf.index)
+	#print(type(finaldf.index))
+
+	#print(finaldf.index[finaldf.index.duplicated()].tolist())
+
+
+	#print(f'Is unique before... Index: {finaldf.index.is_unique} Columns: {finaldf.columns.is_unique}')
+	finaldf = finaldf.groupby(finaldf.index).first()	#This removes rows with duplicate index. It should not remove very many rows.
+
+	#print(f'Is unique after... Index: {finaldf.index.is_unique} Columns: {finaldf.columns.is_unique}')
+
+	#dups = list(finaldf.index.duplicated())
+
+	#print(dups)
+
+	#for i in range(0, len(dups)):
+		#print(dups[i])
+	#	if dups[i]:
+	#		print(f'{i}: {dups[i]}, {finaldf.index.values[i]}')
+
+
+	#print(finaldf.index)
+	#print(type(finaldf.index))
 
 	finaldf = finaldf.resample(datetime.timedelta(microseconds = int((1e6)*(1/datarate)))).interpolate()
 

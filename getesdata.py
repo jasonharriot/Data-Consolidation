@@ -3,6 +3,7 @@ import os
 import io
 import numpy 
 import pandas
+import sys
 import csv
 
 datadir = './esdata'
@@ -72,6 +73,11 @@ def getesdata():
 				#Header row
 				headerfound = True
 				header = row
+
+				for i in range(0, len(header)):
+					sys.stdout.write(f'Changing header val {header[i]} to ')
+					header[i] = header[i].replace('V', 'I')
+					print(f'{header[i]}')
 
 				datacolumns = len(header)
 				print(f'Header: {header}')
@@ -166,12 +172,12 @@ def getesdata():
 	
 
 	#Apply sensor calibrations
-	df['V1'] = df['V1']*-1489.97
-	df['V2'] = df['V2']*-1489.97
-	df['V3'] = df['V3']*-1489.97
-	df['V4'] = df['V4']*-1489.97
-	df['V5'] = df['V5']*-1489.97
-	df['V6'] = df['V6']*-1489.97
+	df['I1'] = df['I1']*-1489.97
+	df['I2'] = df['I2']*-1489.97
+	df['I3'] = df['I3']*-1489.97
+	df['I4'] = df['I4']*-1489.97
+	df['I5'] = df['I5']*-1489.97
+	df['I6'] = df['I6']*-1489.97
 
 	#print(df)
 

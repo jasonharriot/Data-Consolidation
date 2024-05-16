@@ -157,6 +157,6 @@ def getpsudata():
 	df.set_index('Time')
 	df.sort_values(by=['Time'])
 
-	print(df)
+	#print(df)
 
 	return df

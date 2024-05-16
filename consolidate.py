@@ -19,8 +19,8 @@ import getpsudata	#Total current and voltage data logged by Joe's LabVIEW panel
 
 
 
-startdatestr = '2024-05-13T12-10-00'
-enddatestr = '2024-05-13T13-30-00'
+startdatestr = '2024-05-14T12-10-00'
+enddatestr = '2024-05-14T13-30-00'
 datarate = 1	#Hz. If source data rate is less than this, it will be interpolated.
 
 
@@ -39,6 +39,9 @@ if __name__ == '__main__':
 															#Don't get confused.
 	esdf = getesdata.getesdata().set_index('Time')
 	psudf = getpsudata.getpsudata().set_index('Time')
+
+
+	print(f'======== Processing data')
 
 	date = startdate
 
@@ -63,6 +66,7 @@ if __name__ == '__main__':
 	finaldf['P5'] = finaldf['I5']*finaldf['Voltage (V)']
 	finaldf['P6'] = finaldf['I6']*finaldf['Voltage (V)']
 
+	print(f'Final dataframe: ')
 	print(finaldf)
 
 	outputfilename = f'{startdatestr}_to_{enddatestr}_consolidated.csv'	#Processed filename has the start date as name

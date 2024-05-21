@@ -122,7 +122,7 @@ def getpsudata():
 					value = float(row[i])
 				except:
 					value = 0
-					print(f'Warning: defaulting value to zero: row {rowindex}, {i}')
+					#print(f'Warning: defaulting value to zero: row {rowindex}, {i}')
 					
 				#print(f'Including elemnt {i} ({row[i]})')
 					
@@ -153,7 +153,9 @@ def getpsudata():
 	df.columns = header
 
 	#print('Sorting...')
-		 
+	
+	df['Time'] = df['Time'].astype('datetime64[ms]')
+
 	df.set_index('Time')
 	df.sort_values(by=['Time'])
 

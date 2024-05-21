@@ -200,6 +200,8 @@ def getmaindata():
 	df.columns = header
 
 	#print('Sorting...')
+
+	df['Time'] = df['Time'].astype('datetime64[ms]')
 		 
 	df.set_index('Time')
 	df.sort_values(by=['Time'])

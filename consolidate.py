@@ -19,9 +19,9 @@ import getpsudata	#Total current and voltage data logged by Joe's LabVIEW panel
 
 
 
-startdatestr = '2024-05-15T12-00-00'
-enddatestr = '2024-05-15T16-00-00'
-datarate = 1	#Hz. If source data rate is less than this, it will be interpolated.
+startdatestr = '2024-05-21T12-50-00'
+enddatestr = '2024-05-21T12-52-00'
+datarate = 1	#Hz.
 
 
 
@@ -34,54 +34,56 @@ if __name__ == '__main__':
 	enddate = datetime.datetime.strptime(enddatestr, '%Y-%m-%dT%H-%M-%S')
 
 
-	maindf = getmaindata.getmaindata().set_index('Time')	#Use the 'Time' column (which contains datetime objects) as the index.
+	maindf = getmaindata.getmaindata().set_index('Time')[startdate:enddate]	#Use the 'Time' column (which contains datetime objects) as the index.
 															#We will insert another column later which also has the name 'Time'.
 															#Don't get confused.
-	esdf = getesdata.getesdata().set_index('Time')
-	psudf = getpsudata.getpsudata().set_index('Time')
+
+	#print(f'main dataframe:')
+	#print(maindf[0:50])
+
+	esdf = getesdata.getesdata().set_index('Time')[startdate:enddate]
+	#print(f'ES dataframe:')
+	#print(esdf[0:50])
+
+	psudf = getpsudata.getpsudata().set_index('Time')[startdate:enddate]
 
 
-	print(f'======== Processing data')
 
-	date = startdate
+	#print(f'======== Combining dataframes')
+	#print(f'main + ES dataframe + PSU dataframe:')
+	finaldf = maindf.join(esdf, sort=True, how='outer').join(psudf, how='outer')
 
-	finaldf = maindf.join(esdf).join(psudf)
-
-	#Apply start and end dates
-	#finaldf = finaldf.set_index('Time')
-	
-	finaldf = finaldf[startdate:enddate]
-
-	#print(finaldf.index)
-	#print(type(finaldf.index))
-
-	#print(finaldf.index[finaldf.index.duplicated()].tolist())
+	print(f'======== Forward-filling dataframes')
+	finaldf = finaldf.ffill(limit=100)
+	#print(f'forward-filled:')
+	#print(finaldf[0:50])
 
 
 	#print(f'Is unique before... Index: {finaldf.index.is_unique} Columns: {finaldf.columns.is_unique}')
 	finaldf = finaldf.groupby(finaldf.index).first()	#This removes rows with duplicate index. It should not remove very many rows.
-
 	#print(f'Is unique after... Index: {finaldf.index.is_unique} Columns: {finaldf.columns.is_unique}')
-
-	#dups = list(finaldf.index.duplicated())
-
-	#print(dups)
-
-	#for i in range(0, len(dups)):
-		#print(dups[i])
-	#	if dups[i]:
-	#		print(f'{i}: {dups[i]}, {finaldf.index.values[i]}')
+	#print(f'De-duplicated dataframe (may have no change):')
+	#print(finaldf[0:50])
 
 
-	#print(finaldf.index)
-	#print(type(finaldf.index))
+	resampletimedelta=datetime.timedelta(microseconds = int((1e6)*(1/datarate)))
+	#print(f'The time delta for resampling is: {resampletimedelta.seconds} s')
+	#finaldf = finaldf.resample(resampletimedelta).interpolate(method='time
 
-	finaldf = finaldf.resample(datetime.timedelta(microseconds = int((1e6)*(1/datarate)))).interpolate()
 
-	finaldf['ISOTime'] = finaldf.index.map(lambda x: str(x.isoformat()))	#Create the ISO timestamp column
-	temp = finaldf.pop('ISOTime')	#Remove it...
 
-	finaldf.insert(0, 'Time', temp)	#...and re-insert it at the left as 'Time'.
+	finaldf = finaldf.resample(resampletimedelta).interpolate()
+
+
+
+
+	#print(f'Re-sampled dataframe:')
+	#print(finaldf[0:50])
+
+	isotime = finaldf.index.map(lambda x: str(x.isoformat()))	#Create the ISO timestamp column
+	#temp = finaldf.pop('ISOTime')	#Remove it...
+
+	finaldf.insert(0, 'Time', isotime)	#insert it at the left as 'Time'.
 
 	#Compute the power columns. 
 	finaldf['P1'] = finaldf['I1']*finaldf['Voltage (V)']
@@ -91,8 +93,18 @@ if __name__ == '__main__':
 	finaldf['P5'] = finaldf['I5']*finaldf['Voltage (V)']
 	finaldf['P6'] = finaldf['I6']*finaldf['Voltage (V)']
 
+	
 	print(f'Final dataframe: ')
 	print(finaldf)
+
+
+
+	#Print a lot of rows from the dataframe so we can see them all. For debugging.
+	#pandas.set_option('display.max_rows', 500)
+	#print(finaldf[0:300])
+
+
+
 
 	outputfilename = f'{startdatestr}_to_{enddatestr}_consolidated.csv'	#Processed filename has the start date as name
 	finaldf.to_csv(outputfilename, index=False)

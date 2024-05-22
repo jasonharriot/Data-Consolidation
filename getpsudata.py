@@ -153,11 +153,7 @@ def getpsudata():
 	df.columns = header
 
 	#print('Sorting...')
-	
-	df['Time'] = df['Time'].astype('datetime64[ms]')
-
-	df.set_index('Time')
-	df.sort_values(by=['Time'])
+	df = df.set_index('Time').sort_index()
 
 	#print(df)
 

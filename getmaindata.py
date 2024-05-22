@@ -201,11 +201,9 @@ def getmaindata():
 
 	#print('Sorting...')
 
-	df['Time'] = df['Time'].astype('datetime64[ms]')
+	#df['Time'] = df['Time'].astype('datetime64[ms]')
 		 
-	df.set_index('Time')
-	df.sort_values(by=['Time'])
-	#print(df)
+	df = df.set_index('Time').sort_index()
 
 
 	#Apply sensor calibrations

@@ -19,13 +19,13 @@ import getpsudata	#Total current and voltage data logged by Joe's LabVIEW panel
 
 
 
-startdatestr = '2024-01-1T00-00-00'
-enddatestr = '2024-05-22T17-00-00'
+startdatestr = '2024-05-14T09-00-00'
+enddatestr = '2024-05-14T17-00-00'
 
 #datarate = 1	#Hz.
 dataperiod = 1	#Seconds.
 
-interpolate = False	#Interpolate data? Has (should have) no effect if data rate is lower than source data rate
+interpolate = False	#Interpolate data? Has (should have) no effect if data rate is slower than source data rate
 
 
 
@@ -38,18 +38,16 @@ if __name__ == '__main__':
 	enddate = datetime.datetime.strptime(enddatestr, '%Y-%m-%dT%H-%M-%S')
 
 
-	maindf = getmaindata.getmaindata().set_index('Time')[startdate:enddate]	#Use the 'Time' column (which contains datetime objects) as the index.
-															#We will insert another column later which also has the name 'Time'.
-															#Don't get confused.
+	maindf = getmaindata.getmaindata()[startdate:enddate]
 
 	#print(f'main dataframe:')
 	#print(maindf[0:50])
 
-	esdf = getesdata.getesdata().set_index('Time')[startdate:enddate]
+	esdf = getesdata.getesdata()[startdate:enddate]
 	#print(f'ES dataframe:')
 	#print(esdf[0:50])
 
-	psudf = getpsudata.getpsudata().set_index('Time')[startdate:enddate]
+	psudf = getpsudata.getpsudata()[startdate:enddate]
 
 
 

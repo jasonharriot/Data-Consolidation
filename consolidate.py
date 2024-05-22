@@ -19,9 +19,13 @@ import getpsudata	#Total current and voltage data logged by Joe's LabVIEW panel
 
 
 
-startdatestr = '2024-05-21T12-50-00'
-enddatestr = '2024-05-21T12-52-00'
-datarate = 1	#Hz.
+startdatestr = '2024-01-1T00-00-00'
+enddatestr = '2024-05-22T17-00-00'
+
+#datarate = 1	#Hz.
+dataperiod = 1	#Seconds.
+
+interpolate = False	#Interpolate data? Has (should have) no effect if data rate is lower than source data rate
 
 
 
@@ -53,7 +57,7 @@ if __name__ == '__main__':
 	#print(f'main + ES dataframe + PSU dataframe:')
 	finaldf = maindf.join(esdf, sort=True, how='outer').join(psudf, how='outer')
 
-	print(f'======== Forward-filling dataframes')
+	print(f'======== Forward-filling and deduplicating dataframe')
 	finaldf = finaldf.ffill(limit=100)
 	#print(f'forward-filled:')
 	#print(finaldf[0:50])
@@ -66,14 +70,20 @@ if __name__ == '__main__':
 	#print(finaldf[0:50])
 
 
-	resampletimedelta=datetime.timedelta(microseconds = int((1e6)*(1/datarate)))
+	#resampletimedelta=datetime.timedelta(microseconds = int((1e6)*(1/datarate)))
+	resampletimedelta=datetime.timedelta(microseconds = int((1e6)*(dataperiod)))
 	#print(f'The time delta for resampling is: {resampletimedelta.seconds} s')
 	#finaldf = finaldf.resample(resampletimedelta).interpolate(method='time
 
 
 
-	finaldf = finaldf.resample(resampletimedelta).interpolate()
+	print(f'======== Resampling dataframe ')
+	finaldfresampler = finaldf.resample(resampletimedelta)
 
+	if interpolate:
+		finaldf = finaldfresampler.interpolate()
+	else:
+		finaldf = finaldfresampler.ffill()	#Do not interpolate data, keep last known value
 
 
 

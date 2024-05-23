@@ -18,9 +18,9 @@ import getpsudata	#Total current and voltage data logged by Joe's LabVIEW panel
 
 
 
-
-startdatestr = '2024-05-14T09-00-00'
-enddatestr = '2024-05-14T17-00-00'
+day = input('day')
+startdatestr = '2024-05-'+str(day)+'T09-00-00'
+enddatestr = '2024-05-'+str(day)+'T17-00-00'
 
 #datarate = 1	#Hz.
 dataperiod = 1	#Seconds.
